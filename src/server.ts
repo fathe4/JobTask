@@ -29,7 +29,7 @@ console.log(process.env.CORS_ORIGINS);
 // CORS configuration
 app.use(
   cors({
-    origin: process.env.CORS_ORIGINS || "http://localhost:4173",
+    origin: process.env.CORS_ORIGINS,
     credentials: true,
   })
 );
