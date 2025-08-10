@@ -6,6 +6,14 @@ import { requireAdmin } from "../middleware/rbac.middleware";
 const router = Router();
 
 /**
+ * Admin Only Routes
+ * Require authentication and admin role
+ */
+
+// GET /api/v1/users - Get all users (Admin only)
+router.get("/", authenticateToken, requireAdmin, userController.getAllUsers);
+
+/**
  * User Profile Routes
  * All routes require authentication
  */

@@ -4,6 +4,27 @@ import { handleServiceResponse } from "../utils/serviceWrapper";
 import { UserRole } from "../types";
 
 /**
+ * Get all users (Admin only)
+ * Supports pagination and filtering
+ */
+export const getAllUsers = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const { page = 1, limit = 10, role, search, verified } = req.query;
+
+  const result = await userService.getAllUsers(
+    parseInt(page as string),
+    parseInt(limit as string),
+    role as UserRole | "all",
+    search as string,
+    verified as "all" | "verified" | "unverified"
+  );
+
+  handleServiceResponse(res, result);
+};
+
+/**
  * Get current user's profile
  * Requires authentication
  */

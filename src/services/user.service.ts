@@ -12,6 +12,76 @@ import bcrypt from "bcrypt";
 const SALT_ROUNDS = parseInt(process.env.BCRYPT_SALT_ROUNDS || "12");
 
 /**
+ * Get all users with pagination and filtering (Admin only)
+ */
+export const getAllUsers = async (
+  page: number = 1,
+  limit: number = 10,
+  role?: UserRole | "all",
+  search?: string,
+  verified?: "all" | "verified" | "unverified"
+): Promise<ApiResponse> => {
+  return serviceWrapper(async () => {
+    // Build query filter
+    const filter: any = {};
+
+    if (role && role !== "all") {
+      filter.role = role;
+    }
+
+    if (search) {
+      filter.$or = [
+        { fullName: { $regex: search, $options: "i" } },
+        { email: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    if (verified && verified !== "all") {
+      if (verified === "verified") {
+        filter.emailVerified = true;
+      } else if (verified === "unverified") {
+        filter.emailVerified = false;
+      }
+    }
+
+    // Calculate pagination
+    const skip = (page - 1) * limit;
+
+    // Get users and total count
+    const [users, totalUsers] = await Promise.all([
+      User.find(filter)
+        .select("-passwordHash -otpCode -resetPasswordToken")
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit),
+      User.countDocuments(filter),
+    ]);
+
+    const totalPages = Math.ceil(totalUsers / limit);
+
+    return createSuccessResponse("Users retrieved successfully", {
+      users: users.map((user) => ({
+        _id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+        role: user.role,
+        isVerified: user.emailVerified,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+      })),
+      pagination: {
+        currentPage: page,
+        totalPages,
+        totalUsers,
+        limit,
+        hasNext: page < totalPages,
+        hasPrev: page > 1,
+      },
+    });
+  }, "Failed to retrieve users");
+};
+
+/**
  * Get user profile by ID
  */
 export const getUserProfile = async (userId: string): Promise<ApiResponse> => {
