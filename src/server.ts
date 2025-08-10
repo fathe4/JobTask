@@ -25,25 +25,13 @@ app.set("trust proxy", 1);
 // CORS configuration
 app.use(
   cors({
-    origin: "*",
-    credentials: false, // TEMPORARY: Disable credentials to allow wildcard origin
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: [
-      "Content-Type",
-      "Authorization",
-      "X-Requested-With",
-      "Accept",
-    ],
-    optionsSuccessStatus: 200,
+    origin: "https://competency-assessment-client.vercel.app",
+    credentials: true,
   })
 );
 
 // Security middleware
-app.use(
-  helmet({
-    crossOriginEmbedderPolicy: false,
-  })
-);
+app.use(helmet());
 console.log(process.env.CORS_ORIGINS);
 
 // Rate limiting
@@ -57,11 +45,27 @@ const limiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
 });
+
+// CORS configuration
+app.use(
+  cors({
+    origin: "https://competency-assessment-client.vercel.app",
+    credentials: true,
+  })
+);
 app.use(limiter);
 
 // Body parsing middleware
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+
+// CORS configuration
+app.use(
+  cors({
+    origin: "https://competency-assessment-client.vercel.app",
+    credentials: true,
+  })
+);
 
 // Health check route
 app.get("/health", (req, res) => {
