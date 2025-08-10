@@ -22,41 +22,17 @@ const PORT = process.env.PORT || 5000;
 // Trust proxy (for rate limiting behind reverse proxy)
 app.set("trust proxy", 1);
 
-// Security middleware
-app.use(helmet());
-
-// CORS configuration - Use environment variables with fallback
-const allowedOrigins = process.env.CORS_ORIGINS
-  ? process.env.CORS_ORIGINS.split(",").map((origin) => origin.trim())
-  : [
-      "https://competency-assessment-client.vercel.app",
-      "http://localhost:3000", // for local development
-    ];
-
-console.log("Allowed CORS origins:", allowedOrigins);
-
+// CORS configuration
 app.use(
   cors({
-    origin:
-      process.env.NODE_ENV === "development"
-        ? true // Allow all origins in development
-        : function (origin, callback) {
-            // Allow requests with no origin (like mobile apps or curl requests)
-            if (!origin) return callback(null, true);
-
-            if (allowedOrigins.indexOf(origin) !== -1) {
-              callback(null, true);
-            } else {
-              console.log("Blocked by CORS:", origin);
-              callback(new Error("Not allowed by CORS"));
-            }
-          },
+    origin: "https://competency-assessment-client.vercel.app",
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
-    optionsSuccessStatus: 200, // Some legacy browsers choke on 204
   })
 );
+
+// Security middleware
+app.use(helmet());
+console.log(process.env.CORS_ORIGINS);
 
 // Rate limiting
 const limiter = rateLimit({
