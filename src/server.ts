@@ -9,6 +9,10 @@ dotenv.config();
 import { connectDatabase } from "./config/database";
 import authRoutes from "./routes/auth.routes";
 import userRoutes from "./routes/user.routes";
+import questionRoutes from "./routes/question.routes";
+import assessmentRoutes from "./routes/assessment.routes";
+import competencyRoutes from "./routes/competency.routes";
+import certificateRoutes from "./routes/certificate.routes";
 
 // Load environment variables
 
@@ -20,11 +24,12 @@ app.set("trust proxy", 1);
 
 // Security middleware
 app.use(helmet());
+console.log(process.env.CORS_ORIGINS);
 
 // CORS configuration
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    origin: process.env.CORS_ORIGINS || "http://localhost:4173",
     credentials: true,
   })
 );
@@ -59,6 +64,10 @@ app.get("/health", (req, res) => {
 // API Routes
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/questions", questionRoutes);
+app.use("/api/v1/assessments", assessmentRoutes);
+app.use("/api/v1/competencies", competencyRoutes);
+app.use("/api/v1/certificates", certificateRoutes);
 
 // 404 handler
 app.use("*", (req, res) => {
@@ -96,6 +105,18 @@ app.use(
       console.log(`🌐 Health check: http://localhost:${PORT}/health`);
       console.log(`🔐 Auth endpoints: http://localhost:${PORT}/api/v1/auth/*`);
       console.log(`👤 User endpoints: http://localhost:${PORT}/api/v1/users/*`);
+      console.log(
+        `❓ Question endpoints: http://localhost:${PORT}/api/v1/questions/*`
+      );
+      console.log(
+        `📝 Assessment endpoints: http://localhost:${PORT}/api/v1/assessments/*`
+      );
+      console.log(
+        `🎯 Competency endpoints: http://localhost:${PORT}/api/v1/competencies/*`
+      );
+      console.log(
+        `📜 Certificate endpoints: http://localhost:${PORT}/api/v1/certificates/*`
+      );
     });
   } catch (err) {
     console.error("Failed to start server due to DB connection error.");

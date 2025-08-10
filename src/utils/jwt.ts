@@ -8,7 +8,7 @@ export interface JwtPayload {
 export function signAccessToken(userId: string, role?: string): string {
   const secret = process.env.JWT_SECRET || "dev_secret_change_me";
   const options: SignOptions = {
-    expiresIn: "15m",
+    expiresIn: "1d",
   };
 
   const payload: any = { sub: userId };

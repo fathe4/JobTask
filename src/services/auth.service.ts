@@ -135,12 +135,12 @@ export const loginUser = async (
     }
 
     // Check if email is verified
-    if (!user.emailVerified) {
-      throw new ApiError(
-        httpStatus.FORBIDDEN,
-        "Please verify your email before logging in"
-      );
-    }
+    // if (!user.emailVerified) {
+    //   throw new ApiError(
+    //     httpStatus.FORBIDDEN,
+    //     "Please verify your email before logging in"
+    //   );
+    // }
 
     // Compare password using instance method
     const isPasswordValid = await user.comparePassword(password);
@@ -158,6 +158,7 @@ export const loginUser = async (
         fullName: user.fullName,
         email: user.email,
         role: user.role,
+        isVerified: user.emailVerified,
       },
       accessToken,
       refreshToken,

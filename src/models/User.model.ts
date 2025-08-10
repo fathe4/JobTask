@@ -13,6 +13,10 @@ interface IUser extends mongoose.Document {
   otpExpiry?: Date;
   resetPasswordToken?: string;
   resetPasswordExpiry?: Date;
+  // Assessment tracking
+  assessmentStatus: "eligible" | "blocked_step1_failure";
+  highestLevelAchieved?: "A1" | "A2" | "B1" | "B2" | "C1" | "C2";
+  currentStep?: 1 | 2 | 3;
   createdAt: Date;
   updatedAt: Date;
 
@@ -40,6 +44,21 @@ const userSchema = new mongoose.Schema(
     otpExpiry: Date,
     resetPasswordToken: String,
     resetPasswordExpiry: Date,
+    // Assessment tracking fields
+    assessmentStatus: {
+      type: String,
+      enum: ["eligible", "blocked_step1_failure"],
+      default: "eligible",
+    },
+    highestLevelAchieved: {
+      type: String,
+      enum: ["A1", "A2", "B1", "B2", "C1", "C2"],
+    },
+    currentStep: {
+      type: Number,
+      enum: [1, 2, 3],
+      default: 1,
+    },
   },
   { timestamps: true }
 );

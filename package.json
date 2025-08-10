@@ -22,6 +22,7 @@
   "author": "TestSchool Team",
   "license": "MIT",
   "dependencies": {
+    "@types/puppeteer": "^7.0.4",
     "bcrypt": "^5.1.1",
     "compression": "^1.7.4",
     "cors": "^2.8.5",
@@ -35,8 +36,9 @@
     "mongoose": "^7.5.0",
     "nodemailer": "^7.0.5",
     "pdfkit": "^0.13.0",
-    "puppeteer": "^21.1.1",
+    "puppeteer": "^24.16.0",
     "qrcode": "^1.5.3",
+    "react-hot-toast": "^2.5.2",
     "socket.io": "^4.7.2",
     "speakeasy": "^2.0.0",
     "uuid": "^9.0.0",
