@@ -25,7 +25,7 @@ app.set("trust proxy", 1);
 // CORS configuration
 app.use(
   cors({
-    origin: "https://competency-assessment-client.vercel.app",
+    origin: "*",
     credentials: true,
   })
 );
