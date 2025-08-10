@@ -26,12 +26,24 @@ app.set("trust proxy", 1);
 app.use(
   cors({
     origin: "*",
-    credentials: true,
+    credentials: false, // TEMPORARY: Disable credentials to allow wildcard origin
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+      "X-Requested-With",
+      "Accept",
+    ],
+    optionsSuccessStatus: 200,
   })
 );
 
 // Security middleware
-app.use(helmet());
+app.use(
+  helmet({
+    crossOriginEmbedderPolicy: false,
+  })
+);
 console.log(process.env.CORS_ORIGINS);
 
 // Rate limiting
