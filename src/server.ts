@@ -29,9 +29,7 @@ console.log(process.env.CORS_ORIGINS);
 // CORS configuration
 app.use(
   cors({
-    origin:
-      process.env.CORS_ORIGINS ||
-      "https://competency-assessment-client.vercel.app",
+    origin: "https://competency-assessment-client.vercel.app",
     credentials: true,
   })
 );
