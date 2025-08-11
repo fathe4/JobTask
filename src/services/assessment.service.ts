@@ -105,7 +105,6 @@ export const startAssessment = async (
     const stepLevels = getStepLevels(step);
     const questions = await Question.find({
       level: { $in: stepLevels },
-      isActive: true,
     }).sort({ competencyId: 1, level: 1 }); // Sort by competency and level for consistent order
 
     if (questions.length === 0) {
