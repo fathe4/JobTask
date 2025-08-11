@@ -28,6 +28,9 @@ router.get("/history", assessmentController.getUserAssessments);
  * Active Assessment Routes (require testId)
  */
 
+// Get assessment info by testId
+router.get("/:testId", assessmentController.getAssessmentInfo);
+
 // Get current question
 router.get(
   "/:testId/current-question",
@@ -45,5 +48,8 @@ router.post("/:testId/navigate", assessmentController.navigateQuestion);
 
 // Complete assessment
 router.post("/:testId/complete", assessmentController.completeAssessment);
+
+// Get assessment results by testId
+router.get("/:testId/results", assessmentController.getAssessmentResults);
 
 export default router;

@@ -1,7 +1,43 @@
 import { Request, Response } from "express";
 import * as certificateService from "../services/certificate.service";
+import * as emailService from "../services/email.service";
 import { handleServiceResponse } from "../utils/serviceWrapper";
 import { httpStatus } from "../utils/httpStatus";
+
+/**
+ * Test email configuration
+ * GET /api/v1/certificates/test-email
+ */
+export const testEmailConfig = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    console.log("🧪 Testing email configuration...");
+    console.log("📧 Email config:", {
+      EMAIL_HOST: process.env.EMAIL_HOST || "not set",
+      EMAIL_PORT: process.env.EMAIL_PORT || "not set",
+      EMAIL_USER: process.env.EMAIL_USER || "not set",
+      EMAIL_PASSWORD: process.env.EMAIL_PASSWORD ? "***SET***" : "not set",
+      EMAIL_FROM: process.env.EMAIL_FROM || "not set",
+      EMAIL_SECURE: process.env.EMAIL_SECURE || "not set",
+    });
+
+    // Test connection
+    await emailService.testEmailConnection();
+
+    res.status(httpStatus.OK).json({
+      success: true,
+      message: "Email configuration is working",
+    });
+  } catch (error: any) {
+    console.error("❌ Email configuration test failed:", error);
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: error.message || "Email configuration test failed",
+    });
+  }
+};
 
 /**
  * Download certificate as PDF

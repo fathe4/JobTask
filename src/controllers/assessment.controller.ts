@@ -200,3 +200,31 @@ export const getUserAssessments = async (
   const result = await assessmentService.getUserAssessments(userId);
   handleServiceResponse(res, result);
 };
+
+/**
+ * Get assessment results by testId
+ * GET /api/v1/assessments/:testId/results
+ */
+export const getAssessmentResults = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const testId = req.params.testId;
+
+  const result = await assessmentService.getAssessmentResults(testId);
+  handleServiceResponse(res, result);
+};
+
+/**
+ * Get assessment info by testId
+ * GET /api/v1/assessments/:testId
+ */
+export const getAssessmentInfo = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const testId = req.params.testId;
+
+  const result = await assessmentService.getAssessmentInfo(testId);
+  handleServiceResponse(res, result);
+};

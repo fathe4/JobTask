@@ -8,6 +8,13 @@ const router = express.Router();
 router.use(authenticateToken);
 
 /**
+ * @route   GET /api/certificates/test-email
+ * @desc    Test email configuration
+ * @access  Private
+ */
+router.get("/test-email", certificateController.testEmailConfig);
+
+/**
  * @route   GET /api/certificates/user/me
  * @desc    Get current user's certificates
  * @access  Private

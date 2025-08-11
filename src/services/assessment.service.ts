@@ -32,12 +32,12 @@ export const checkUserEligibility = async (
       throw new ApiError(httpStatus.NOT_FOUND, "User not found");
     }
 
-    // if (user.assessmentStatus === "blocked_step1_failure") {
-    //   throw new ApiError(
-    //     httpStatus.FORBIDDEN,
-    //     "Assessment access blocked due to Step 1 failure (<25%)"
-    //   );
-    // }
+    if (user.assessmentStatus === "blocked_step1_failure") {
+      throw new ApiError(
+        httpStatus.FORBIDDEN,
+        "Assessment access blocked due to Step 1 failure (<25%)"
+      );
+    }
 
     if (step > 1) {
       const previousStep = (step - 1) as TestStep;
@@ -508,6 +508,9 @@ export const completeAssessment = async (
       // Generate certificate if level achieved
       let certificate = null;
       if (levelAchieved) {
+        console.log(
+          `🎓 Level achieved: ${levelAchieved}, creating certificate...`
+        );
         certificate = new Certificate({
           userId: test.userId,
           levelAchieved,
@@ -516,27 +519,46 @@ export const completeAssessment = async (
           issuedDate: new Date(),
         });
         await certificate.save({ session });
+        console.log(`✅ Certificate created with ID: ${certificate._id}`);
+      } else {
+        console.log(
+          `❌ No level achieved. Score: ${score}, Step: ${test.step}`
+        );
       }
 
       await session.commitTransaction();
 
-      // Send certificate email AFTER transaction commit
-      let emailSent = false;
+      // Send certificate email in the background (non-blocking)
       if (certificate) {
-        try {
-          await sendCertificateEmail(
-            user.email,
-            user.fullName,
-            certificate._id.toString(),
-            levelAchieved!
-          );
-          emailSent = true;
-          console.log(
-            `✅ Certificate email sent to ${user.email} for level ${levelAchieved}`
-          );
-        } catch (emailError) {
-          console.error("❌ Failed to send certificate email:", emailError);
-        }
+        console.log(
+          `📧 Scheduling certificate email to ${user.email} in background...`
+        );
+
+        // Fire and forget - don't await this
+        setImmediate(async () => {
+          try {
+            await sendCertificateEmail(
+              user.email,
+              user.fullName,
+              certificate._id.toString(),
+              levelAchieved!
+            );
+            console.log(
+              `✅ Certificate email sent to ${user.email} for level ${levelAchieved}`
+            );
+          } catch (emailError) {
+            console.error("❌ Failed to send certificate email:", emailError);
+            console.error("❌ Email error details:", {
+              message:
+                emailError instanceof Error
+                  ? emailError.message
+                  : String(emailError),
+              stack: emailError instanceof Error ? emailError.stack : undefined,
+            });
+          }
+        });
+      } else {
+        console.log(`📧 No certificate created, skipping email send`);
       }
 
       return createSuccessResponse("Assessment completed successfully", {
@@ -552,7 +574,7 @@ export const completeAssessment = async (
           ? {
               id: certificate._id,
               levelAchieved: certificate.levelAchieved,
-              emailSent,
+              emailSent: true, // We've scheduled it, so we return true
             }
           : null,
       });
@@ -604,6 +626,73 @@ export const getUserAssessments = async (
       },
     });
   }, "Failed to retrieve user assessments");
+};
+
+/**
+ * Get assessment results by testId (for results page)
+ */
+export const getAssessmentResults = async (
+  testId: string
+): Promise<ApiResponse> => {
+  return serviceWrapper(async () => {
+    const test = await Test.findById(testId);
+    if (!test) {
+      throw new ApiError(httpStatus.NOT_FOUND, "Test not found");
+    }
+
+    if (test.status !== "completed") {
+      throw new ApiError(httpStatus.BAD_REQUEST, "Test is not completed yet");
+    }
+
+    // Find associated certificate if one exists
+    const certificate = await Certificate.findOne({ testId: test._id });
+
+    return createSuccessResponse("Assessment results retrieved successfully", {
+      test: {
+        id: test._id,
+        step: test.step,
+        score: test.score,
+        levelAchieved: test.levelAchieved,
+        canProceedToNextStep: test.canProceedToNextStep,
+        blocksRetake: test.blocksRetake,
+      },
+      certificate: certificate
+        ? {
+            id: certificate._id,
+            levelAchieved: certificate.levelAchieved,
+            emailSent: true,
+          }
+        : null,
+    });
+  }, "Failed to retrieve assessment results");
+};
+
+/**
+ * Get assessment info by testId (for loading assessment state)
+ */
+export const getAssessmentInfo = async (
+  testId: string
+): Promise<ApiResponse> => {
+  return serviceWrapper(async () => {
+    const test = await Test.findById(testId);
+    if (!test) {
+      throw new ApiError(httpStatus.NOT_FOUND, "Test not found");
+    }
+
+    return createSuccessResponse("Assessment info retrieved successfully", {
+      id: test._id,
+      step: test.step,
+      status: test.status,
+      currentQuestionIndex: test.currentQuestionIndex,
+      totalQuestions: test.totalQuestions,
+      questionsAnswered: test.questionsAnswered,
+      score: test.score,
+      levelAchieved: test.levelAchieved,
+      canProceedToNextStep: test.canProceedToNextStep,
+      startedAt: test.startedAt,
+      completedAt: test.completedAt,
+    });
+  }, "Failed to retrieve assessment info");
 };
 
 // Helper functions
